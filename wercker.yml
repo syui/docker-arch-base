@@ -1,0 +1,15 @@
+box: syui/docker-arch
+build:
+  steps:
+    - script:
+        name: check version
+        code: |
+                uname -a
+deploy:
+  steps:
+    - internal/docker-push:
+        username: $USERNAME
+        password: $PASSWORD
+        tag: test
+        repository: syui/docker-arch-base
+        registry: https://hub.docker.com/r/syui/docker-arch-base
