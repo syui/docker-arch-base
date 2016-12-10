@@ -1,3 +1,4 @@
+update : d1
 
 ## step 1
 
@@ -6,20 +7,73 @@ $ systemctl start docker
 $ pacman -Sy expect arch-install-scripts --noconfirm
 $ curl -sLO https://raw.githubusercontent.com/docker/docker/master/contrib/mkimage-arch-pacman.conf -O https://raw.githubusercontent.com/docker/docker/master/contrib/mkimage-arch.sh -O https://github.com/docker/docker/blob/master/contrib/mkimage-archarm-pacman.conf 
 $ chmod +x mkimage-arch.sh
+$ vim mkimage-arch.sh
+DOCKER_IMAGE_NAME=$USER/$REPO
+
 $ ./mkimage-arch.sh
-$ docker save archlinux > archlinux.tar.gz
+
+$ docker run -it $USER/$REPO /bin/bash
+# :
+# pacman -Sy archlinux-keyring --noconfirm
+# pacman-key --refresh-keys
+# pacman -Sy --noconfirm
+# pacman-db-upgrade
+# trust extract-compat
+# exit
+
+$ docker push $USER/$REPO
 ```
 
 ## step 2
 
+update : travis-ci($USER/$REPO) -> cron jobs -> d1
+
+> .travis.yml
+
 ```bash
-$ tar -c . | docker import syui/docker-arch-base
-$ docker push syui/docker-arch-base
+language: $LANG
+sudo: required
+services:
+  - docker
+
+env:
+  - TARGET_CONTAINER_ID=container-$REPO
+
+
+script:
+  - docker build -t $REPO .
+
+after_success:
+  - if [ "$TRAVIS_BRANCH" == "master" ]; then
+        docker login -e="$DOCKER_EMAIL" -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
+        docker push $USER/$REPO;
+    fi
+```
+
+## other
+
+```bash
+$ ./mkimage-arch.sh
+```
+
+```bash
+$ docker save archlinux > archlinux.tar.gz
+$ tar -c . | docker import - $USER/$REPO
+$ docker run -it $USER/$REPO /bin/bash
+# :
+# pacman -Sy archlinux-keyring --noconfirm
+# pacman-key --refresh-keys
+# pacman -Sy --noconfirm
+# pacman-db-upgrade
+# trust extract-compat
+# exit
+
+$ docker push $USER/$REPO
 ```
 
 or 
 
-> dockerfile
+> Dockerfile
 
 ```base
 FROM scratch
@@ -27,21 +81,14 @@ ADD archlinux.tar.gz /
 ```
 
 ```bash
-$ docker build -t syui/docker-arch-base .
-$ docker psuh syui/docker-arch-base
-```
+$ docker build -t $USER/$REPO .
+# :
+# pacman -Sy archlinux-keyring --noconfirm
+# pacman-key --refresh-keys
+# pacman -Sy --noconfirm
+# pacman-db-upgrade
+# trust extract-compat
+# exit
 
-## step 3
-
-update : travis-ci -> cron jobs -> w1
-
-```.travis-ci.yml
-script:
-  - docker build -t docker-arch-base .
-
-after_success:
-  - if [ "$TRAVIS_BRANCH" == "master" ]; then
-        docker login -e="$DOCKER_EMAIL" -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
-        docker push syui/docker-arch-base;
-    fi
+$ docker psuh $USER/$REPO
 ```
