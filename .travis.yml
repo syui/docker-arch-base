@@ -1,5 +1,7 @@
-language: python
 sudo: required
+
+language: ruby
+
 services:
   - docker
 
@@ -7,10 +9,10 @@ env:
   - TARGET_CONTAINER_ID=container-docker-arch-base
 
 script:
-  - docker build -t docker-arch-base .
+  - docker build -t syui/docker-arch-base .
 
 after_success:
-  - if [ "$TRAVIS_BRANCH" == "master" ]; then
+- if [ "$TRAVIS_BRANCH" == "master" ]; then
         docker login -e="$DOCKER_EMAIL" -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
         docker push syui/docker-arch-base;
-    fi
+  fi

@@ -1,6 +1,9 @@
-update : d1
+```bash
+$ sudo docker pull syui/docker-arch-base
+$ sudo docker run -it syui/docker-arch-base /bin/bash
+```
 
-## step 1
+## Step 1
 
 ```bash
 $ systemctl start docker
@@ -24,7 +27,7 @@ $ docker run -it $USER/$REPO /bin/bash
 $ docker push $USER/$REPO
 ```
 
-## step 2
+## Step 2
 
 update : travis-ci($USER/$REPO) -> cron jobs -> d1
 
@@ -41,7 +44,7 @@ env:
 
 
 script:
-  - docker build -t $REPO .
+  - docker build -t $USER/$REPO .
 
 after_success:
   - if [ "$TRAVIS_BRANCH" == "master" ]; then
@@ -50,14 +53,14 @@ after_success:
     fi
 ```
 
-## other
+## Other
 
 ```bash
 $ ./mkimage-arch.sh
 ```
 
 ```bash
-$ docker save archlinux > archlinux.tar.gz
+$ docker save $USER/$REPO > archlinux.tar.gz
 $ tar -c . | docker import - $USER/$REPO
 $ docker run -it $USER/$REPO /bin/bash
 # :
@@ -82,6 +85,7 @@ ADD archlinux.tar.gz /
 
 ```bash
 $ docker build -t $USER/$REPO .
+$ docker run -it $USER/$REPO /bin/bash
 # :
 # pacman -Sy archlinux-keyring --noconfirm
 # pacman-key --refresh-keys
